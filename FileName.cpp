@@ -1,29 +1,31 @@
 #include<iostream>
 using namespace std;
 
-enum RightOrWrong {
-	rightAnswer = 1, wrongAnswer = 2
-};
+
 
 enum Level {
-	easy = 1, medium = 2, hard = 3, mix = 4
+	easy =1,medium =2,hard =3 ,mix =4
 };
 
 enum OperationType {
-	Add = 1, subtract = 2, multiply = 3, divide = 4, mixed = 5
+	Add=1,subtract=2,multiply =3,divide =4,mixed=5
 };
 
-struct RoundInfo {
+struct QuestionInfo {
 	OperationType operation;
 	Level lvl;
 	int firstnumber, secondnumber;
-	RightOrWrong answerstate;
+	bool answerstate;
+	int inputAnswer;
+	int answer;
 };
 
-struct GameInfo {
-	int numberOfQuestions;
+struct QuizzInfo {
+	
+	QuestionInfo listOfQuestions[100];
 	Level lvl;
 	OperationType op;
+	int numberOfQuestions;
 	int countOfWrongAnswers = 0;
 	int countOfRightAnswers = 0;
 	bool Pass;
@@ -69,7 +71,7 @@ int GenerateNumberBasedOnLevel(Level lvl) {
 	}
 }
 
-OperationType GetOperationBasedOnInput(OperationType op) {
+OperationType GetOperationForQuestion(OperationType op) {
 
 	if (op == OperationType::mixed)
 		return (OperationType)RandomNumber(1, 4);
@@ -78,19 +80,19 @@ OperationType GetOperationBasedOnInput(OperationType op) {
 
 }
 
-int CalculateAnswer(RoundInfo roundInfo) {
+int CalculateAnswer(QuestionInfo QuestionInfo) {
 
-	switch (roundInfo.operation) {
+	switch (QuestionInfo.operation) {
 	case multiply:
-		return roundInfo.firstnumber * roundInfo.secondnumber;
+		return QuestionInfo.firstnumber * QuestionInfo.secondnumber;
 	case divide:
-		return roundInfo.firstnumber / roundInfo.secondnumber;
+		return QuestionInfo.firstnumber / QuestionInfo.secondnumber;
 	case Add:
-		return roundInfo.firstnumber + roundInfo.secondnumber;
+		return QuestionInfo.firstnumber + QuestionInfo.secondnumber;
 	case subtract:
-		return roundInfo.firstnumber - roundInfo.secondnumber;
+		return QuestionInfo.firstnumber - QuestionInfo.secondnumber;
 	default:
-		return roundInfo.firstnumber + roundInfo.secondnumber;
+		return QuestionInfo.firstnumber + QuestionInfo.secondnumber;
 	}
 }
 
@@ -109,20 +111,20 @@ char GetOperationSymbol(OperationType op) {
 
 }
 
-void PrintQuestion(RoundInfo roundInfo) {
+void PrintQuestion(QuestionInfo QuestionInfo) {
 
 	cout << endl;
-	cout << roundInfo.firstnumber << endl;
-	cout << roundInfo.secondnumber << "  " << GetOperationSymbol(roundInfo.operation) << endl;
+	cout << QuestionInfo.firstnumber << endl;
+	cout << QuestionInfo.secondnumber << "  "<<GetOperationSymbol(QuestionInfo.operation)<<endl;
 	cout << "-------\n";
 }
 
-void UpdateGameResults(RoundInfo roundInfo, GameInfo& gameInfo) {
+void UpdateGameResults(QuestionInfo QuestionInfo, QuizzInfo& QuizzInfo) {
 
-	if (roundInfo.answerstate == rightAnswer)
-		gameInfo.countOfRightAnswers++;
+	if (QuestionInfo.answerstate == true)
+		QuizzInfo.countOfRightAnswers++;
 	else
-		gameInfo.countOfWrongAnswers++;
+		QuizzInfo.countOfWrongAnswers++;
 
 
 }
@@ -149,7 +151,7 @@ string GetLevelName(int i) {
 }
 string GetOperationName(int i) {
 
-	string Operations[] = { "Add" , "Subtract" , "Multiply" ,"Divide", "Mix" };
+	string Operations[] = { "Add" , "Subtract" , "Multiply" ,"Divide", "Mix"};
 
 	return Operations[i - 1];
 
@@ -157,38 +159,13 @@ string GetOperationName(int i) {
 
 
 
-RightOrWrong GetAnswerAndEvaluate(RoundInfo roundInfo) {
 
-	int inputAnswer;
-	cin >> inputAnswer;
+Level GetLevelForQuestion(Level quizzLvl) {
 
-	int answer = CalculateAnswer(roundInfo);
-
-	if (inputAnswer == answer) {
-		roundInfo.answerstate = rightAnswer;
-		system("color A0");
-		cout << "right answer\n";
-
-	}
-	else {
-		roundInfo.answerstate = wrongAnswer;
-		system("color C0");
-		cout << "\a";
-		cout << "wrong answer\n";
-		cout << "the right answer is " << answer << endl;
-
-	}
-
-	return roundInfo.answerstate;
-}
-
-
-Level GetLevelForRound(GameInfo gameInfo) {
-
-	if (gameInfo.lvl == Level::mix)
+	if (quizzLvl == Level::mix)
 		return (Level)RandomNumber(1, 3);
 	else
-		return gameInfo.lvl;
+		return quizzLvl;
 
 }
 
@@ -203,9 +180,9 @@ void DisplayPassOrFail(string PassOrFail) {
 
 }
 
-void PrintFinalGameResults(GameInfo gameInfo) {
+void PrintFinalGameResults(QuizzInfo QuizzInfo) {
 
-	if (gameInfo.countOfRightAnswers > gameInfo.countOfWrongAnswers) {
+	if (QuizzInfo.countOfRightAnswers >= QuizzInfo.countOfWrongAnswers) {
 
 		DisplayPassOrFail("Pass :-)");
 
@@ -216,31 +193,61 @@ void PrintFinalGameResults(GameInfo gameInfo) {
 	}
 
 
-	cout << "\nnumber of questions        : " << gameInfo.numberOfQuestions;
-	cout << "\nQuestions level            : " << GetLevelName(gameInfo.lvl);
-	cout << "\noperation type             : " << GetOperationName(gameInfo.op);
-	cout << "\nnumber of right questions  : " << gameInfo.countOfRightAnswers;
-	cout << "\nnumber of wrong questions  : " << gameInfo.countOfWrongAnswers << endl;
+	cout << "\nnumber of questions        : " << QuizzInfo.numberOfQuestions;
+	cout << "\nQuestions level            : " << GetLevelName(QuizzInfo.lvl);
+	cout << "\noperation type             : " << GetOperationName(QuizzInfo.op);
+	cout << "\nnumber of right questions  : " << QuizzInfo.countOfRightAnswers;
+	cout << "\nnumber of wrong questions  : " << QuizzInfo.countOfWrongAnswers << endl;
 	cout << "________________________________________________________\n";
 }
 
-void PlayRound(GameInfo& gameInfo) {
-
-	RoundInfo roundInfo;
-
-	roundInfo.lvl = GetLevelForRound(gameInfo);
 
 
-	roundInfo.firstnumber = GenerateNumberBasedOnLevel(roundInfo.lvl);
-	roundInfo.secondnumber = GenerateNumberBasedOnLevel(roundInfo.lvl);
-	roundInfo.operation = GetOperationBasedOnInput(gameInfo.op);
+void GenerateQuestion(QuestionInfo & question,QuizzInfo & quizz) {
 
-	PrintQuestion(roundInfo);
+	question.lvl = GetLevelForQuestion(quizz.lvl);
 
-	roundInfo.answerstate = GetAnswerAndEvaluate(roundInfo);
+	question.firstnumber= GenerateNumberBasedOnLevel(question.lvl);
+
+	question.secondnumber = GenerateNumberBasedOnLevel(question.lvl);
+
+	question.operation = GetOperationForQuestion(quizz.op);
+
+	question.answer = CalculateAnswer(question);
 
 
-	UpdateGameResults(roundInfo, gameInfo);
+}
+
+
+void GetQuestionAnswerFromUserAndEvaluate(QuestionInfo & question) {
+
+	PrintQuestion(question);
+
+	cin>>question.inputAnswer;
+
+
+
+	if (question.answer == question.inputAnswer) {
+	
+		system("color A0");
+		cout << "right answer\n";
+
+		question.answerstate = true;
+	
+	
+	
+	}
+	else {
+		
+		system("color C0");
+		cout << "\a";
+		cout << "wrong answer\n";
+		cout << "the right answer is " << question.answer << endl;
+		question.answerstate = false;
+
+	}
+
+	
 
 
 
@@ -249,26 +256,32 @@ void PlayRound(GameInfo& gameInfo) {
 
 void StartGame() {
 
-	int numberOfQuestions;
+	QuizzInfo quizz;
 
-	numberOfQuestions = ReadNumberInRange("how many questions do you want ? 1 to 10", 1, 10);
+	quizz.numberOfQuestions = ReadNumberInRange("how many questions do you want ? 1 to 10", 1, 10);
 
-	GameInfo gameInfo;
+	quizz.lvl = GetLevelFromUser();
+	quizz.op = GetOperationTypeFromUser();
 
-	gameInfo.numberOfQuestions = numberOfQuestions;
-	gameInfo.lvl = GetLevelFromUser();
-	gameInfo.op = GetOperationTypeFromUser();
 
-	for (int questionNumber = 1; questionNumber <= numberOfQuestions; questionNumber++) {
-
+	for (int questionNumber = 0; questionNumber < quizz.numberOfQuestions; questionNumber++) {
+		
 		cout << "\n\n____________________________";
-		cout << "\nQuestion [" << questionNumber << "/" << numberOfQuestions << "]\n";
-		PlayRound(gameInfo);
-		cout << "____________________________\n\n";
+		cout << "\nQuestion [" << questionNumber+1 << "/" << quizz.numberOfQuestions << "]\n";
 
+		GenerateQuestion( quizz.listOfQuestions[questionNumber] , quizz );
+		GetQuestionAnswerFromUserAndEvaluate(quizz.listOfQuestions[questionNumber]);
+		UpdateGameResults(quizz.listOfQuestions[questionNumber], quizz);
 
 	}
-	PrintFinalGameResults(gameInfo);
+
+	//diferent from abo hadhoud one in that in hadhoud her loops to 1 generate all questions then loops to get answer
+	//for every question and then update and print the result 
+
+
+
+	
+	PrintFinalGameResults(quizz);
 
 
 
@@ -303,4 +316,8 @@ int main() {
 
 
 	return 0;
+
+
+
+	
 }
